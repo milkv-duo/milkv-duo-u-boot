@@ -583,7 +583,7 @@ static int cmd_call(struct cmd_tbl *cmdtp, int flag, int argc,
 	return result;
 }
 
-enum command_ret_t cmd_process(int flag, int argc, char *const argv[],
+int cmd_process(int flag, int argc, char *const argv[],
 			       int *repeatable, ulong *ticks)
 {
 	enum command_ret_t rc = CMD_RET_SUCCESS;
