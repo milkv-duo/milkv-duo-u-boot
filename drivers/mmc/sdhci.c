@@ -23,6 +23,8 @@
 #include <phys2bus.h>
 #include <power/regulator.h>
 
+#include <asm/arch/sdhci_reg.h>
+
 static void sdhci_reset(struct sdhci_host *host, u8 mask)
 {
 	unsigned long timeout;
@@ -39,6 +41,9 @@ static void sdhci_reset(struct sdhci_host *host, u8 mask)
 		timeout--;
 		udelay(1000);
 	}
+
+	if (host->ops && host->ops->reset)
+		host->ops->reset(host, mask);
 }
 
 static void sdhci_cmd_done(struct sdhci_host *host, struct mmc_cmd *cmd)
@@ -107,7 +112,17 @@ static void sdhci_prepare_dma(struct sdhci_host *host, struct mmc_data *data,
 
 	if (host->flags & USE_SDMA) {
 		dma_addr = dev_phys_to_bus(mmc_to_dev(host->mmc), host->start_addr);
-		sdhci_writel(host, dma_addr, SDHCI_DMA_ADDRESS);
+		// sdhci_writel(host, dma_addr, SDHCI_DMA_ADDRESS);
+		int ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
+		if (sdhci_readw(host, SDHCI_HOST_CONTROL2) & SDHCI_HOST_VER4_ENABLE) {
+			sdhci_writel(host, dma_addr, SDHCI_ADMA_ADDRESS);
+			sdhci_writel(host, (dma_addr >> 32), SDHCI_ADMA_ADDRESS_HI);
+			sdhci_writel(host, data->blocks, SDHCI_DMA_ADDRESS);
+			sdhci_writew(host, 0, SDHCI_BLOCK_COUNT);
+		} else {
+			sdhci_writel(host, dma_addr, SDHCI_DMA_ADDRESS);
+			sdhci_writew(host, data->blocks, SDHCI_BLOCK_COUNT);
+		}
 	}
 #if CONFIG_IS_ENABLED(MMC_SDHCI_ADMA)
 	else if (host->flags & (USE_ADMA | USE_ADMA64)) {
@@ -167,7 +182,14 @@ static int sdhci_transfer_data(struct sdhci_host *host, struct mmc_data *data)
 				start_addr += SDHCI_DEFAULT_BOUNDARY_SIZE;
 				start_addr = dev_phys_to_bus(mmc_to_dev(host->mmc),
 							     start_addr);
-				sdhci_writel(host, start_addr, SDHCI_DMA_ADDRESS);
+				// sdhci_writel(host, start_addr, SDHCI_DMA_ADDRESS);
+				int ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
+				if (sdhci_readw(host, SDHCI_HOST_CONTROL2) & SDHCI_HOST_VER4_ENABLE) {
+					sdhci_writel(host, start_addr, SDHCI_ADMA_ADDRESS);
+					sdhci_writel(host, (start_addr >> 32), SDHCI_ADMA_ADDRESS_HI);
+				} else {
+					sdhci_writel(host, start_addr, SDHCI_DMA_ADDRESS);
+				}
 			}
 		}
 		if (timeout-- > 0)
@@ -621,7 +643,9 @@ static void sdhci_set_voltage(struct sdhci_host *host)
 			}
 
 			/* Wait for 5 ms */
-			mdelay(5);
+			// mdelay(5);
+			if (host->ops && host->ops->voltage_switch)
+				host->ops->voltage_switch(mmc);
 
 			/* 1.8V regulator output has to be stable within 5 ms */
 			if (IS_SD(mmc)) {
