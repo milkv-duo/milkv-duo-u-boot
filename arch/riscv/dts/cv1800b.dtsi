@@ -193,5 +193,46 @@
 
 			phy-mode = "rmii";
 		};
+
+		gpio0: gpio@03020000 {
+			compatible = "snps,dw-apb-gpio";
+			reg = <0x03020000 0x1000>;
+			#address-cells = <1>;
+			#size-cells = <0>;
+
+			porta: gpio-controller@0 {
+				compatible = "snps,dw-apb-gpio-port";
+				bank-name = "porta";
+				gpio-controller;
+				#gpio-cells = <2>;
+				snps,nr-gpios = <32>;
+				reg = <0>;
+			};
+		};
+
+		sd:cv-sd@4310000 {
+			compatible = "cvitek,cv180x-sd";
+			reg = <0x4310000 0x1000>;
+			reg-names = "core_mem";
+			bus-width = <4>;
+			cap-sd-highspeed;
+			cap-mmc-highspeed;
+			sd-uhs-sdr12;
+			sd-uhs-sdr25;
+			sd-uhs-sdr50;
+			sd-uhs-sdr104;
+			no-sdio;
+			no-mmc;
+			/*no-1-8-v;*/
+			src-frequency = <375000000>;
+			min-frequency = <400000>;
+			max-frequency = <200000000>;
+			64_addressing;
+			reset_tx_rx_phy;
+			reset-names = "sdhci";
+			pll_index = <0x6>;
+			pll_reg = <0x3002070>;
+			cvi-cd-gpios = <&porta 13 GPIO_ACTIVE_LOW>;
+		};
 	};
 };
