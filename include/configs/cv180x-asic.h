@@ -94,8 +94,11 @@
 #define CONFIG_SERVERIP			192.168.8.60
 
 #ifndef BOOT_TARGET_DEVICES
-#define BOOT_TARGET_DEVICES(func) \
-	func(MMC, mmc, 0)
+#define BOOT_TARGET_DEVICES(func)	\
+	func(MMC, mmc, 0)		\
+	func(PXE, pxe, na)		\
+	func(DHCP, dhcp, na)
+
 #endif
 
 #define KERNEL_ADDR_R		__stringify(0x80200000)
