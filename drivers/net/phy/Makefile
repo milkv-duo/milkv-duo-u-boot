@@ -42,3 +42,4 @@ obj-$(CONFIG_PHY_VITESSE) += vitesse.o
 obj-$(CONFIG_PHY_MSCC) += mscc.o
 obj-$(CONFIG_PHY_FIXED) += fixed.o
 obj-$(CONFIG_PHY_NCSI) += ncsi.o
+obj-$(CONFIG_PHY_CVITEK) += cvitek.o

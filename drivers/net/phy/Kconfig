@@ -343,6 +343,9 @@ config PHY_XWAY
 	help
 	  This adds support for the Intel XWAY (formerly Lantiq) Gbe PHYs.
 
+config PHY_CVITEK
+	bool "CVITEK PHY support"
+
 config PHY_ETHERNET_ID
 	bool "Read ethernet PHY id"
 	depends on DM_GPIO
