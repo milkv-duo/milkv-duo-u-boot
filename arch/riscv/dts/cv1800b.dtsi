@@ -223,7 +223,7 @@
 			sd-uhs-sdr104;
 			no-sdio;
 			no-mmc;
-			/*no-1-8-v;*/
+			no-1-8-v;
 			src-frequency = <375000000>;
 			min-frequency = <400000>;
 			max-frequency = <200000000>;
