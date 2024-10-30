@@ -926,6 +926,7 @@
 	};
 
 	chosen {
+		boot-hartid = <0>;
 		stdout-path = "serial0";
 	};
 };
